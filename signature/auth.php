@@ -9,13 +9,13 @@
  * @param string $appSecret
  * @param string $http_method HTTP method: GET/POST
  * @param string $http_uri    HTTP URI
- * @param array  $params      GET query strings/POST body
+ * @param array  $params      GET:query strings/POST:body
  *
  * @return string
  */
 function getAuthorization(string $appId, string $appSecret, string $http_method, string $http_uri, array $params = [], bool $debug)
 {
-    // 1. Sort
+    // 1. Sort 
     ksort($params);
 
     // 2. Get current timestamp
