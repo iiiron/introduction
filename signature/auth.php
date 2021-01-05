@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Method  calculateSignature
+ * Method  getAuthorization
  *
  * @author realsee-developers
  *
@@ -13,28 +13,43 @@
  *
  * @return string
  */
-function calculateSignature(string $appId, string $appSecret, string $http_method, string $http_uri, array $params = [])
+function getAuthorization(string $appId, string $appSecret, string $http_method, string $http_uri, array $params = [], bool $debug)
 {
+    // 1. Sort
+    ksort($params);
+
+    // 2. Get current timestamp
     $timestamp = time(); // now
 
-    $params = [
+    $paramsForSign = [];
+    foreach ($params as $key => $value) {
+        $paramsForSign[] = "{$key}={$value}";
+    }
+
+    $arrayForSign = [
+        'body_crc32' => crc32(http_build_query($paramsForSign)),
         'method' => strtoupper($http_method),
         'url'    => $http_uri,
     ];
+    $stringForSign = implode('', $arrayForSign);
 
-    if (!empty($params)) {
-        ksort($params);
-        $params['body_crc32'] = crc32(http_build_query($params));
-    }
+    $salt = strtoupper(md5($appId . $appSecret . $timestamp));
 
-    ksort($params);
+    $signature = strtoupper(hash_hmac('sha256', $stringForSign, $salt));
 
-    $signatureElements = [];
+    $stringForAuth =  $appId . ':' . $signature . ':' . $timestamp;
+    $authorization = base64_encode($stringForAuth);
 
-    foreach ($params as $key => $value) {
-        $signatureElements[] = "{$key}={$value}";
+    if ($debug) {
+        echo '__DEBUG__' . PHP_EOL;
+        var_dump('paramsForSign', $paramsForSign, 'stringForSign', $stringForSign, 'stringForAuth', $stringForAuth);
+        var_dump('original', $appId . $appSecret . $timestamp, 'salt', $salt, 'signature', $signature, 'authorization', $authorization);
+        echo '__DEBUG__' . PHP_EOL;
     }
 
     // hash_hmac即sha256
-    return strtoupper(hash_hmac('sha256', implode('', $signatureElements), strtoupper(md5($appId . $appSecret . $timestamp))));
+    return $authorization;
 }
+
+
+echo getAuthorization('1017', 'hello world', 'POST', '/a/b/c.json', ['foo' => 'bar'], false);

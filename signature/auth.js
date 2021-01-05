@@ -12,7 +12,7 @@ function b_crc32(str) {
     return (crc ^ (-1)) >>> 0
 }
 
-function generateAppSign(params) {
+function getAuthorization(params) {
     params.sort()
 
     paramsForSign = []
@@ -59,7 +59,7 @@ switch (pm.request.method) {
         break
 }
 
-const authorization = generateAppSign(query.split('&'))
+const authorization = getAuthorization(query.split('&'))
 
 postman.setEnvironmentVariable('Authorization', authorization)
 postman.setEnvironmentVariable('AppId', appID)
