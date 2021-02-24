@@ -80,7 +80,7 @@ public class Auth {
     }
 
     private static LinkedHashMap<String, Object> buildSortParam(Map<String, Object> params) {
-        LinkedHashMap<String, Object> result = new LinkedHashMap<>(params);
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
 
         params.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(o -> {
             result.put(o.getKey(), o.getValue());
